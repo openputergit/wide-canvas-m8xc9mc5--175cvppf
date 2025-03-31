@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alchemy Agent Swarm - Neubrutalism</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: #fdfdfd;
+            color: #111111;
+            position: relative;
+        }
+
+        /* Neubrutalism styles */
+        .neubrutalism {
+            background: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 5px 5px 0px #000000;
+            transition: all 0.2s ease;
+        }
+        
+        .neubrutalism:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #000000;
+        }
+        
+        .neubrutalism-sm {
+            border: 2px solid #000000;
+            box-shadow: 3px 3px 0px #000000;
+        }
+        
+        .neubrutalism-sm:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px #000000;
+        }
+        
+        .neubrutalism-flat {
+            border: 3px solid #000000;
+        }
+        
+        .btn-neubrutalism {
+            background-color: #ff6b6b;
+            color: #000000;
+            border: 3px solid #000000;
+            box-shadow: 3px 3px 0px #000000;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .btn-neubrutalism:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 5px 5px 0px #000000;
+        }
+        
+        .btn-neubrutalism:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+        
+        .agent-card {
+            background: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 5px 5px 0px #000000;
+            transition: all 0.2s ease;
+        }
+        
+        .agent-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #000000;
+        }
+        
+        .tab-active {
+            border-bottom-width: 5px !important;
+            background-color: #fef08a;
+        }
+        
+        .social-icon {
+            transition: all 0.2s ease;
+        }
+        
+        .social-icon:hover {
+            transform: scale(1.2);
+        }
+        
+        .chat-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        .user-message {
+            background-color: #a5f3fc;
+            border: 2px solid #000000;
+            box-shadow: 3px 3px 0px #000000;
+        }
+        
+        .agent-message {
+            background-color: #fef08a;
+            border: 2px solid #000000;
+            box-shadow: 3px 3px 0px #000000;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .resource-item {
+            border: 2px solid #000000;
+            box-shadow: 2px 2px 0px #000000;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+        
+        .resource-item:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px #000000;
+            background-color: #e9e9e9;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #ffffff;
+            border-left: 2px solid #000000;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #ff6b6b;
+            border: 2px solid #000000;
+        }
+        
+        /* Loading animation */
+        .loading-dots span {
+            animation: loadingDots 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dots span:nth-child(1) {
+            animation-delay: 0.0s;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes loadingDots {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1.0);
+            }
+        }
+        
+        /* Agent connection lines */
+        .connection-line {
+            stroke: #000000;
+            stroke-width: 2px;
+            stroke-dasharray: 5;
+            animation: lineFlow 10s linear infinite;
+        }
+        
+        @keyframes lineFlow {
+            to {
+                stroke-dashoffset: -50;
+            }
+        }
+        
+        /* Interactive UI elements */
+        .switch-track {
+            transition: background-color 0.2s ease;
+        }
+        
+        .switch-thumb {
+            transition: transform 0.2s ease;
+        }
+        
+        /* Weight indicator */
+        .weight-indicator {
+            height: 10px;
+            border: 1px solid #000;
+        }
+        
+        /* Agent node */
+        .agent-node {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .agent-node:hover {
+            transform: scale(1.1);
+        }
+        
+        .agent-node-label {
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        /* Visualization container */
+        #visualizationContainer {
+            border: 3px solid #000000;
+            box-shadow: 5px 5px 0px #000000;
+        }
+
+        /* Toggle checkbox styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            transform: translateX(100%);
+            border-color: #000;
+        }
+        
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #fef08a;
+        }
+
+        /* Personality profiles */
+        .personality-card {
+            background-color: #ffffff;
+            border: 3px solid #000000;
+            box-shadow: 5px 5px 0px #000000;
+            transition: all 0.2s ease;
+        }
+        
+        .personality-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0px #000000;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-10">
+            <h1 class="text-5xl font-bold text-center" style="color: #ff6b6b; text-shadow: 2px 2px 0px #000000;">
+                ALCHEMY AGENT SWARM
+            </h1>
+            <p class="text-center text-gray-700 mt-2 font-bold">INTELLIGENT AGENTS WORKING TOGETHER</p>
+            <div class="w-40 h-2 bg-black mx-auto mt-4"></div>
+        </header>
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-20">
+            <div class="flex flex-col items-center justify-center space-y-4">
+                <div class="neubrutalism-sm p-6 bg-white">
+                    <div class="loading-dots flex items-center justify-center space-x-4">
+                        <span class="w-5 h-5 bg-black rounded-full inline-block"></span>
+                        <span class="w-5 h-5 bg-black rounded-full inline-block"></span>
+                        <span class="w-5 h-5 bg-black rounded-full inline-block"></span>
+                    </div>
+                    <p class="text-xl font-bold mt-4">LOADING AGENT DATA...</p>
+                    <p class="text-sm mt-2">CONNECTING TO THE SWARM NETWORK</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="hidden">
+            <!-- Tabs -->
+            <div class="border-b-4 border-black mb-8">
+                <nav class="flex flex-wrap space-x-2 md:space-x-4 lg:space-x-8">
+                    <button id="visualizationTab" class="py-4 px-3 md:px-6 border-b-4 border-black tab-active font-bold focus:outline-none uppercase text-sm md:text-base">
+                        <i class="bi bi-grid-3x3-gap-fill mr-2"></i>Swarm Viz
+                    </button>
+                    <button id="chatTab" class="py-4 px-3 md:px-6 border-b-4 border-transparent font-bold focus:outline-none uppercase text-sm md:text-base">
+                        <i class="bi bi-chat-left-text mr-2"></i>Chat with Swarm
+                    </button>
+                    <button id="workflowTab" class="py-4 px-3 md:px-6 border-b-4 border-transparent font-bold focus:outline-none uppercase text-sm md:text-base">
+                        <i class="bi bi-diagram-3 mr-2"></i>Agent Workflow
+                    </button>
+                    <button id="profilesTab" class="py-4 px-3 md:px-6 border-b-4 border-transparent font-bold focus:outline-none uppercase text-sm md:text-base">
+                        <i class="bi bi-person-badge mr-2"></i>Personality Profiles
+                    </button>
+                </nav>
+            </div>
+            
+            <!-- Visualization View -->
+            <div id="visualizationView">
+                <!-- Controls -->
+                <div class="mb-4 flex flex-wrap gap-4 items-center">
+                    <div class="neubrutalism-sm p-2 bg-white">
+                        <label class="font-bold uppercase text-sm">VISUALIZATION MODE:</label>
+                        <select id="vizModeSelect" class="ml-2 bg-white border-2 border-black p-1">
+                            <option value="network">Network View</option>
+                            <option value="galaxy">Galaxy View</option>
+                            <option value="hierarchy">Hierarchy View</option>
+                        </select>
+                    </div>
+                    
+                    <div class="neubrutalism-sm p-2 bg-white flex items-center">
+                        <span class="font-bold uppercase text-sm">SHOW CONNECTIONS:</span>
+                        <div class="relative inline-block w-12 ml-2 align-middle select-none">
+                            <input type="checkbox" id="showConnections" checked class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-black appearance-none cursor-pointer"/>
+                            <label for="showConnections" class="toggle-label block overflow-hidden h-6 rounded-full bg-white border-2 border-black cursor-pointer"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="neubrutalism-sm p-2 bg-white flex items-center">
+                        <span class="font-bold uppercase text-sm">ROTATE:</span>
+                        <div class="relative inline-block w-12 ml-2 align-middle select-none">
+                            <input type="checkbox" id="autoRotate" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-2 border-black appearance-none cursor-pointer"/>
+                            <label for="autoRotate" class="toggle-label block overflow-hidden h-6 rounded-full bg-white border-2 border-black cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3D Visualization Container -->
+                <div id="visualizationContainer" class="w-full h-[60vh] mb-8 overflow-hidden bg-white relative">
+                    <!-- Agent detail overlay -->
+                    <div id="agentDetail" class="hidden absolute top-4 right-4 neubrutalism-sm bg-white p-4 w-64 z-10">
+                        <h3 id="detailName" class="font-bold text-lg"></h3>
+                        <p id="detailTitle" class="text-sm"></p>
+                        <p id="detailDescription" class="text-sm mt-2"></p>
+                        <div class="mt-3">
+                            <div class="flex justify-between text-sm">
+                                <span>Connection Weight:</span>
+                                <span id="detailWeight"></span>
+                            </div>
+                            <div class="weight-indicator bg-red-400 mt-1" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Agent Card Grid -->
+                <div class="mb-4 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold uppercase">Agent Network</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold">SORT BY:</span>
+                        <select id="sortSelect" class="bg-white border-2 border-black p-2">
+                            <option value="name">Name</option>
+                            <option value="title">Job Title</option>
+                            <option value="company">Company</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="agentList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+            
+            <!-- Chat View -->
+            <div id="chatView" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Chat Interface -->
+                    <div class="lg:col-span-2">
+                        <div class="neubrutalism bg-white overflow-hidden">
+                            <div class="p-4 border-b-3 border-black">
+                                <h3 class="font-bold text-xl uppercase">Chat with Agent Swarm</h3>
+                                <p class="text-sm">ASK QUESTIONS TO THE ENTIRE AGENT NETWORK</p>
+                            </div>
+                            
+                            <div id="chatMessages" class="h-[50vh] overflow-y-auto p-4 space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="bg-yellow-200 border-2 border-black p-2">
+                                        <i class="bi bi-robot text-black"></i>
+                                    </div>
+                                    <div class="agent-message p-4 max-w-[80%]">
+                                        <p>Hello! I'm the Alchemy Agent Swarm. I can help you with information about employees, company data, or answer general questions. What would you like to know?</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4 border-t-3 border-black">
+                                <form id="chatForm" class="flex items-center space-x-2">
+                                    <input type="text" id="userMessage" placeholder="ASK THE SWARM A QUESTION..." 
+                                           class="flex-grow border-3 border-black p-3 focus:outline-none">
+                                    <button type="submit" class="btn-neubrutalism px-5 py-3 uppercase">
+                                        SEND <i class="bi bi-send ml-2"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Response Media -->
+                        <div id="responseMediaContainer" class="mt-6 hidden">
+                            <h3 class="text-lg font-bold uppercase mb-2">Media Response</h3>
+                            <div class="neubrutalism bg-white p-4">
+                                <div id="mediaContent" class="flex flex-col items-center">
+                                    <!-- Media content will be placed here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Agent & Resources Panel -->
+                    <div>
+                        <div class="neubrutalism bg-white overflow-hidden">
+                            <div class="p-4 border-b-3 border-black">
+                                <h3 class="font-bold text-lg uppercase">Active Agents</h3>
+                            </div>
+                            <div id="activeAgentsList" class="h-[30vh] overflow-y-auto p-4 space-y-3">
+                                <!-- Active agents will be displayed here -->
+                            </div>
+                        </div>
+                        
+                        <div class="neubrutalism bg-white overflow-hidden mt-6">
+                            <div class="p-4 border-b-3 border-black flex justify-between items-center">
+                                <h3 class="font-bold text-lg uppercase">Resources</h3>
+                                <button id="downloadResourcesBtn" class="btn-neubrutalism px-3 py-2 text-sm">
+                                    <i class="bi bi-download mr-1"></i> DOWNLOAD
+                                </button>
+                            </div>
+                            <div id="resourcesList" class="h-[25vh] overflow-y-auto p-4">
+                                <!-- Resources will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Workflow View -->
+            <div id="workflowView" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2">
+                        <div class="neubrutalism bg-white p-4 mb-6">
+                            <h2 class="text-xl font-bold uppercase mb-3">Agent Workflow & Interactions</h2>
+                            <p>This diagram shows how agents interact with each other in the swarm.</p>
+                            
+                            <!-- SVG Workflow Diagram -->
+                            <div class="w-full overflow-x-auto mt-4">
+                                <svg id="workflowSvg" width="100%" height="400" class="border-2 border-black"></svg>
+                            </div>
+                        </div>
+                        
+                        <div class="neubrutalism bg-white p-4">
+                            <h2 class="text-xl font-bold uppercase mb-3">Agent Weights & Influence</h2>
+                            <p class="mb-4">The relative importance of each agent in the decision-making process.</p>
+                            
+                            <div id="agentWeightsList" class="space-y-4">
+                                <!-- Agent weights will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="neubrutalism bg-white overflow-hidden">
+                            <div class="p-4 border-b-3 border-black">
+                                <h3 class="font-bold text-lg uppercase">Selected Agent</h3>
+                            </div>
+                            <div id="selectedAgentDetail" class="p-4">
+                                <p class="text-gray-500 italic">Click on an agent in the workflow to see details.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="neubrutalism bg-white overflow-hidden mt-6">
+                            <div class="p-4 border-b-3 border-black">
+                                <h3 class="font-bold text-lg uppercase">Process Steps</h3>
+                            </div>
+                            <div id="processStepsList" class="p-4">
+                                <ol class="list-decimal list-inside space-y-2">
+                                    <li class="font-bold">Query Processing</li>
+                                    <li>Agent Selection & Assignment</li>
+                                    <li>Information Gathering</li>
+                                    <li>Collaborative Analysis</li>
+                                    <li>Response Formulation</li>
+                                    <li>Quality Verification</li>
+                                    <li>Response Delivery</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personality Profiles View -->
+            <div id="personalityProfilesView" class="hidden">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold uppercase mb-4">Agent Personality Profiles</h2>
+                    <p class="mb-4">Each agent in the swarm has a distinct personality that guides their interactions and decision-making.</p>
+                
+                    <!-- Search and Filter -->
+                    <div class="flex flex-wrap gap-4 items-center mb-6 neubrutalism-sm bg-white p-4">
+                        <div class="flex-grow">
+                            <input type="text" id="profileSearch" placeholder="SEARCH AGENTS..." class="w-full border-3 border-black p-3 focus:outline-none">
+                        </div>
+                        <div>
+                            <select id="personalityFilter" class="bg-white border-2 border-black p-3">
+                                <option value="all">All Personalities</option>
+                                <option value="analytical">Analytical</option>
+                                <option value="creative">Creative</option>
+                                <option value="diplomatic">Diplomatic</option>
+                                <option value="critical">Critical</option>
+                                <option value="supportive">Supportive</option>
+                            </select>
+                        </div>
+                    </div>
+                
+                    <!-- Profiles Grid -->
+                    <div id="personalityProfilesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Profiles will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let camera, scene, renderer, controls;
+        let agents = [];
+        let agentMeshes = [];
+        let employeeData = [];
+        let agentData = [];
+        let workflowNodes = [];
+        let workflowLinks = [];
+        let autoRotate = false;
+        let selectedAgent = null;
+        let personalityProfiles = [];
+        
+        // Initialize Three.js scene
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xffffff);
+            
+            camera = new THREE.PerspectiveCamera(75, 
+                document.getElementById('visualizationContainer').clientWidth / 
+                document.getElementById('visualizationContainer').clientHeight, 
+                0.1, 1000);
+                
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(
+                document.getElementById('visualizationContainer').clientWidth, 
+                document.getElementById('visualizationContainer').clientHeight
+            );
+            document.getElementById('visualizationContainer').appendChild(renderer.domElement);
+            
+            // Add orbit controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            camera.position.z = 15;
+
+            // Add ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            scene.add(ambientLight);
+
+            // Add directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+            
+            // Add a grid helper
+            const gridHelper = new THREE.GridHelper(30, 30, 0x000000, 0xcccccc);
+            gridHelper.position.y = -5;
+            scene.add(gridHelper);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate agent meshes
+            if (autoRotate) {
+                scene.rotation.y += 0.002;
+            }
+            
+            agentMeshes.forEach((mesh, index) => {
+                mesh.rotation.x += 0.005;
+                mesh.rotation.y += 0.007;
+                
+                // Add floating animation
+                mesh.position.y += Math.sin(Date.now() * 0.001 + index) * 0.003;
+            });
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Load and parse CSV data
+        async function loadData() {
+            try {
+                const employeeResponse = await fetch('https://db.zetaverse.one/storage/v1/object/public/app-uploads/spreadsheet-1743404375699/M3zUtQkKKuSEJc42z7B8Aiy3oO12/wbnyr8nh.csv');
+                const employeeData = await employeeResponse.text();
+                
+                const agentResponse = await fetch('https://db.zetaverse.one/storage/v1/object/public/app-uploads/spreadsheet-1743404621423/M3zUtQkKKuSEJc42z7B8Aiy3oO12/gniq0pjj.csv');
+                const agentData = await agentResponse.text();
+
+                Papa.parse(employeeData, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(employeeResults) {
+                        Papa.parse(agentData, {
+                            header: true,
+                            skipEmptyLines: true,
+                            complete: function(agentResults) {
+                                processData(employeeResults.data, agentResults.data);
+                            },
+                            error: function(error) {
+                                console.error('Error parsing agent CSV:', error);
+                                showErrorMessage("Failed to parse agent data. Please try again.");
+                            }
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error parsing employee CSV:', error);
+                        showErrorMessage("Failed to parse employee data. Please try again.");
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showErrorMessage("Failed to load data. Please check your internet connection and try again.");
+            }
+        }
+
+        function showErrorMessage(message) {
+            document.getElementById('loadingState').innerHTML = `
+                <div class="text-center py-10">
+                    <div class="neubrutalism p-6 bg-red-100 inline-block">
+                        <i class="bi bi-exclamation-triangle text-4xl mb-4"></i>
+                        <p class="text-xl font-bold">${message}</p>
+                        <button class="btn-neubrutalism mt-4 px-4 py-2" onclick="loadData()">RETRY</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function processData(employees, agents) {
+            // Store original data for reference
+            employeeData = employees;
+            agentData = agents;
+            
+            // Combine employee and agent data
+            const combinedData = employees.map((employee, index) => {
+                const agent = agents[index % agents.length];
+                return {
+                    ...employee,
+                    agentInfo: agent,
+                    // Add weight for agent's importance
+                    weight: Math.random() * 0.7 + 0.3, // Random weight between 0.3 and 1.0
+                    // Add connections data
+                    connections: generateRandomConnections(employees.length, index)
+                };
+            });
+
+            // Generate personality profiles
+            generatePersonalityProfiles(combinedData);
+
+            // Create 3D visualization
+            createAgentVisuals(combinedData);
+            
+            // Generate workflow data
+            generateWorkflowData(combinedData, agents);
+            
+            // Update UI elements
+            updateUI(combinedData);
+            updateActiveAgents(agents);
+            updateResourcesList(agents);
+            updateAgentWeights(combinedData);
+            renderWorkflowDiagram();
+            updatePersonalityProfilesGrid();
+            
+            // Hide loading state, show main content
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            
+            // Set up event listeners for controls
+            setupEventListeners();
+        }
+
+        function generateRandomConnections(totalAgents, currentAgentIndex) {
+            const connections = [];
+            // Generate 3-5 random connections
+            const numConnections = Math.floor(Math.random() * 3) + 2;
+            
+            for (let i = 0; i < numConnections; i++) {
+                // Don't connect to self
+                let targetIndex;
+                do {
+                    targetIndex = Math.floor(Math.random() * totalAgents);
+                } while (targetIndex === currentAgentIndex);
+                
+                connections.push({
+                    targetIndex,
+                    weight: Math.random()
+                });
+            }
+            
+            return connections;
+        }
+
+        function generatePersonalityProfiles(combinedData) {
+            // Personality types
+            const personalityTypes = [
+                'analytical',
+                'creative',
+                'diplomatic',
+                'critical',
+                'supportive'
+            ];
+
+            // Personality traits arrays
+            const traits = {
+                analytical: ['Detail-oriented', 'Logical', 'Methodical', 'Precise', 'Systematic'],
+                creative: ['Imaginative', 'Innovative', 'Adaptable', 'Visionary', 'Open-minded'],
+                diplomatic: ['Tactful', 'Patient', 'Collaborative', 'Empathetic', 'Mediative'],
+                critical: ['Evaluative', 'Skeptical', 'Thorough', 'Discerning', 'Direct'],
+                supportive: ['Encouraging', 'Helpful', 'Reliable', 'Trustworthy', 'Considerate']
+            };
+
+            // Communication styles
+            const communicationStyles = {
+                analytical: 'Factual and information-dense, focusing on accuracy and completeness.',
+                creative: 'Explorative and open-ended, focusing on possibilities and innovation.',
+                diplomatic: 'Balanced and considerate, focusing on building consensus.',
+                critical: 'Direct and questioning, focusing on evaluation and improvement.',
+                supportive: 'Encouraging and positive, focusing on team cohesion and morale.'
+            };
+
+            // Relationship dynamics
+            const relationshipDynamics = {
+                analytical: {
+                    strongest: ['analytical', 'critical'],
+                    weakest: ['creative', 'supportive']
+                },
+                creative: {
+                    strongest: ['supportive', 'creative'],
+                    weakest: ['critical', 'analytical']
+                },
+                diplomatic: {
+                    strongest: ['supportive', 'analytical'],
+                    weakest: ['critical']
+                },
+                critical: {
+                    strongest: ['analytical', 'critical'],
+                    weakest: ['supportive', 'diplomatic']
+                },
+                supportive: {
+                    strongest: ['diplomatic', 'creative'],
+                    weakest: ['critical', 'analytical']
+                }
+            };
+
+            // Generate personality profiles for each agent
+            personalityProfiles = combinedData.map((agent, index) => {
+                const personalityType = personalityTypes[index % personalityTypes.length];
+                const selectedTraits = [];
+                
+                // Select 3 random traits for each agent
+                const allTraits = [...traits[personalityType]];
+                for (let i = 0; i < 3; i++) {
+                    if (allTraits.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * allTraits.length);
+                        selectedTraits.push(allTraits[randomIndex]);
+                        allTraits.splice(randomIndex, 1);
+                    }
+                }
+                
+                return {
+                    agentId: index,
+                    firstName: agent['First Name'] || 'Agent',
+                    lastName: agent['Last Name'] || index,
+                    positionTitle: agent['Job Title'] || 'Team Member',
+                    personalityType: personalityType,
+                    traits: selectedTraits,
+                    communicationStyle: communicationStyles[personalityType],
+                    relationshipDynamics: relationshipDynamics[personalityType],
+                    strengths: selectedTraits,
+                    challenges: getOppositeTraits(selectedTraits, personalityType, traits),
+                    avatar: `https://source.unsplash.com/random/150x150/?abstract,${index}`
+                };
+            });
+        }
+
+        function getOppositeTraits(selectedTraits, personalityType, allTraits) {
+            // Get opposite personality type
+            const oppositeMap = {
+                'analytical': 'creative',
+                'creative': 'analytical',
+                'diplomatic': 'critical',
+                'critical': 'diplomatic', 
+                'supportive': 'critical'
+            };
+            
+            const oppositeType = oppositeMap[personalityType];
+            
+            // Get 2 random traits from the opposite type
+            const oppositeTraits = [...allTraits[oppositeType]];
+            const challenges = [];
+            
+            for (let i = 0; i < 2; i++) {
+                if (oppositeTraits.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * oppositeTraits.length);
+                    challenges.push(oppositeTraits[randomIndex]);
+                    oppositeTraits.splice(randomIndex, 1);
+                }
+            }
+            
+            return challenges;
+        }
+
+        function generateWorkflowData(combinedData, agents) {
+            workflowNodes = agents.map((agent, index) => {
+                return {
+                    id: index,
+                    name: agent['Agent Name'] || `Agent ${agent['Agent Number']}`,
+                    type: Math.floor(Math.random() * 3), // 0: input, 1: process, 2: output
+                    description: agent['Description'] || "Agent description unavailable",
+                    responsibilities: agent['Responsibilities'] || "No specific responsibilities assigned",
+                    weight: Math.random() * 0.7 + 0.3
+                };
+            });
+            
+            workflowLinks = [];
+            
+            // Generate links between nodes (more structured for workflow)
+            for (let i = 0; i < workflowNodes.length; i++) {
+                // Every node connects to 1-3 other nodes
+                const numLinks = Math.floor(Math.random() * 3) + 1;
+                
+                for (let j = 0; j < numLinks; j++) {
+                    let target;
+                    
+                    // For input nodes (type 0), connect to process nodes (type 1)
+                    if (workflowNodes[i].type === 0) {
+                        const processNodes = workflowNodes.filter(node => node.type === 1);
+                        target = processNodes[Math.floor(Math.random() * processNodes.length)].id;
+                    }
+                    // For process nodes (type 1), connect to output nodes (type 2) or other process nodes
+                    else if (workflowNodes[i].type === 1) {
+                        const possibleTargets = workflowNodes.filter(node => 
+                            (node.type === 1 || node.type === 2) && node.id !== i);
+                        if (possibleTargets.length > 0) {
+                            target = possibleTargets[Math.floor(Math.random() * possibleTargets.length)].id;
+                        } else {
+                            continue;
+                        }
+                    }
+                    // For output nodes (type 2), don't create outgoing connections
+                    else {
+                        continue;
+                    }
+                    
+                    // Check if this link already exists
+                    const linkExists = workflowLinks.some(link => 
+                        link.source === i && link.target === target);
+                    
+                    if (!linkExists && i !== target) {
+                        workflowLinks.push({
+                            source: i,
+                            target,
+                            value: Math.random() * 0.8 + 0.2 // Random strength between 0.2 and 1.0
+                        });
+                    }
+                }
+            }
+        }
+
+        function createAgentVisuals(data) {
+            // Clear existing meshes
+            agentMeshes.forEach(mesh => {
+                scene.remove(mesh);
+            });
+            agentMeshes = [];
+            
+            // Get visualization mode
+            const vizMode = document.getElementById('vizModeSelect')?.value || 'network';
+            
+            data.forEach((agent, index) => {
+                // Generate a unique color based on job role or department
+                let color;
+                if (agent['Management Level'] && agent['Management Level'].includes('C-Level')) {
+                    color = 0xff6b6b; // Red for executives
+                } else if (agent['Job Title'] && agent['Job Title'].toLowerCase().includes('manager')) {
+                    color = 0x4ecdc4; // Teal for managers
+                } else {
+                    color = 0xffd166; // Yellow for others
+                }
+                
+                // Create unique geometry based on role
+                let geometry;
+                if (agent['Management Level'] && agent['Management Level'].includes('C-Level')) {
+                    geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+                } else if (agent['Job Title'] && agent['Job Title'].toLowerCase().includes('manager')) {
+                    geometry = new THREE.ConeGeometry(0.8, 1.6, 6);
+                } else {
+                    geometry = new THREE.SphereGeometry(0.8, 8, 8);
+                }
+                
+                // Create material with wireframe
+                const material = new THREE.MeshPhongMaterial({
+                    color,
+                    wireframe: true,
+                    emissive: color,
+                    emissiveIntensity: 0.2
+                });
+                
+                // Create solid material for underneath
+                const solidMaterial = new THREE.MeshPhongMaterial({
+                    color,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                
+                // Create wireframe mesh
+                const wireframeMesh = new THREE.Mesh(geometry, material);
+                
+                // Create solid mesh (slightly smaller)
+                const solidGeometry = geometry.clone();
+                solidGeometry.scale(0.9, 0.9, 0.9);
+                const solidMesh = new THREE.Mesh(solidGeometry, solidMaterial);
+                
+                // Create a group to hold both meshes
+                const group = new THREE.Group();
+                group.add(solidMesh);
+                group.add(wireframeMesh);
+                
+                // Position based on visualization mode
+                if (vizMode === 'network') {
+                    // Network layout - circular with some randomness
+                    const angle = (index / data.length) * Math.PI * 2;
+                    const radius = 7 + Math.random() * 3;
+                    group.position.x = Math.cos(angle) * radius;
+                    group.position.z = Math.sin(angle) * radius;
+                    group.position.y = (Math.random() - 0.5) * 5;
+                } else if (vizMode === 'galaxy') {
+                    // Galaxy layout - spiral pattern
+                    const angle = (index / data.length) * Math.PI * 8;
+                    const radius = 3 + (index / data.length) * 7;
+                    group.position.x = Math.cos(angle) * radius;
+                    group.position.z = Math.sin(angle) * radius;
+                    group.position.y = (index / data.length) * 8 - 4;
+                } else if (vizMode === 'hierarchy') {
+                    // Hierarchy layout - based on management level
+                    let level = 0;
+                    if (agent['Management Level']) {
+                        if (agent['Management Level'].includes('C-Level')) {
+                            level = 2;
+                        } else if (agent['Management Level'].includes('VP') || agent['Management Level'].includes('Director')) {
+                            level = 1;
+                        }
+                    }
+                    
+                    const angle = (index % 8) / 8 * Math.PI * 2;
+                    const radius = 3 + level * 3;
+                    group.position.x = Math.cos(angle) * radius;
+                    group.position.z = Math.sin(angle) * radius;
+                    group.position.y = level * 3 - 3;
+                }
+                
+                // Store reference to agent data
+                group.userData = {
+                    agentIndex: index,
+                    agentData: agent
+                };
+                
+                // Add click event to show details
+                group.callback = function() {
+                    showAgentDetail(agent, index);
+                };
+                
+                scene.add(group);
+                agentMeshes.push(group);
+            });
+            
+            // Add connections between agents based on the connections data
+            if (document.getElementById('showConnections')?.checked !== false) {
+                addAgentConnections(data);
+            }
+        }
+
+        function addAgentConnections(data) {
+            data.forEach((agent, sourceIndex) => {
+                if (agent.connections) {
+                    agent.connections.forEach(connection => {
+                        const sourceMesh = agentMeshes[sourceIndex];
+                        const targetMesh = agentMeshes[connection.targetIndex];
+                        
+                        if (sourceMesh && targetMesh) {
+                            // Create a curved line between agents
+                            const points = [];
+                            const startPoint = new THREE.Vector3().copy(sourceMesh.position);
+                            const endPoint = new THREE.Vector3().copy(targetMesh.position);
+                            const midPoint = new THREE.Vector3().addVectors(startPoint, endPoint).multiplyScalar(0.5);
+                            
+                            // Add some height to the midpoint for a curve
+                            midPoint.y += 2;
+                            
+                            // Create a quadratic curve
+                            for (let i = 0; i <= 20; i++) {
+                                const t = i / 20;
+                                const point = new THREE.Vector3();
+                                
+                                // Quadratic interpolation
+                                point.x = (1-t)*(1-t)*startPoint.x + 2*(1-t)*t*midPoint.x + t*t*endPoint.x;
+                                point.y = (1-t)*(1-t)*startPoint.y + 2*(1-t)*t*midPoint.y + t*t*endPoint.y;
+                                point.z = (1-t)*(1-t)*startPoint.z + 2*(1-t)*t*midPoint.z + t*t*endPoint.z;
+                                
+                                points.push(point);
+                            }
+                            
+                            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+                            
+                            // Line material based on connection weight
+                            const lineMaterial = new THREE.LineBasicMaterial({ 
+                                color: 0x000000,
+                                linewidth: 2,
+                                transparent: true,
+                                opacity: connection.weight * 0.7 + 0.3,
+                                dashed: true
+                            });
+                            
+                            const line = new THREE.Line(lineGeometry, lineMaterial);
+                            scene.add(line);
+                        }
+                    });
+                }
+            });
+        }
+
+        function showAgentDetail(agent, index) {
+            const detailPanel = document.getElementById('agentDetail');
+            const nameElem = document.getElementById('detailName');
+            const titleElem = document.getElementById('detailTitle');
+            const descElem = document.getElementById('detailDescription');
+            const weightElem = document.getElementById('detailWeight');
+            const weightIndicator = document.querySelector('.weight-indicator');
+            
+            // Get first name and last name with fallbacks
+            const firstName = agent['First Name'] || 'Unknown';
+            const lastName = agent['Last Name'] || '';
+            const jobTitle = agent['Job Title'] || 'Team Member';
+            
+            // Show agent details
+            nameElem.textContent = `${firstName} ${lastName}`;
+            titleElem.textContent = jobTitle;
+            descElem.textContent = agent.agentInfo?.Description || 'Agent description unavailable';
+            
+            // Update weight information
+            const weight = Math.round(agent.weight * 100);
+            weightElem.textContent = `${weight}%`;
+            weightIndicator.style.width = `${weight}%`;
+            
+            // Show the detail panel
+            detailPanel.classList.remove('hidden');
+        }
+
+        function updateUI(data) {
+            const agentList = document.getElementById('agentList');
+            agentList.innerHTML = '';
+
+            data.forEach((item, index) => {
+                // Create employee card with agent info
+                const card = document.createElement('div');
+                card.className = 'agent-card rounded-lg p-6';
+                
+                // Determine LinkedIn and email presence
+                const hasLinkedIn = item['LinkedIn Contact Profile URL'] && item['LinkedIn Contact Profile URL'].includes('linkedin.com');
+                const hasEmail = item['Email Address'] && item['Email Address'].includes('@');
+                
+                // Get first name and last name with fallbacks
+                const firstName = item['First Name'] || 'Unknown';
+                const lastName = item['Last Name'] || '';
+                const jobTitle = item['Job Title'] || 'Team Member';
+                const companyName = item['Company Name'] || 'Alchemy';
+                
+                // Get social links with fallbacks
+                const linkedInUrl = hasLinkedIn ? item['LinkedIn Contact Profile URL'] : '#';
+                const emailAddress = hasEmail ? item['Email Address'] : '';
+                const twitterUrl = item['Twitter Company Profile URL'] || '#';
+                const facebookUrl = item['Facebook Company Profile URL'] || '#';
+                
+                // Get personality profile if available
+                const profile = personalityProfiles.find(p => p.agentId === index);
+                const personalityType = profile ? profile.personalityType : 'unknown';
+                
+                // Determine background color based on role
+                let bgColor;
+                if (item['Management Level'] && item['Management Level'].includes('C-Level')) {
+                    bgColor = 'bg-red-100';
+                } else if (item['Job Title'] && item['Job Title'].toLowerCase().includes('manager')) {
+                    bgColor = 'bg-teal-100';
+                } else {
+                    bgColor = 'bg-yellow-100';
+                }
+                
+                // Create a more detailed card with the agent info added
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold">${firstName} ${lastName}</h3>
+                            <p class="text-gray-700 text-sm">${jobTitle}</p>
+                        </div>
+                        <div class="${bgColor} border-2 border-black rounded-full w-10 h-10 flex items-center justify-center">
+                            <span class="font-bold">${index + 1}</span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm mb-4">${companyName}</p>
+                    
+                    <div class="border-t-2 border-black my-3"></div>
+                    
+                    <div class="mb-3">
+                        <h4 class="text-xs font-bold uppercase mb-1">AGENT INFO</h4>
+                        <p class="text-sm">${item.agentInfo?.Description || 'Agent description unavailable'}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h4 class="text-xs font-bold uppercase mb-1">PERSONALITY</h4>
+                        <p class="text-sm capitalize">${personalityType}</p>
+                    </div>
+                    
+                    <div class="flex space-x-3 justify-between items-center">
+                        <div class="flex space-x-2">
+                            ${hasLinkedIn ? `
+                                <a href="${linkedInUrl}" target="_blank" 
+                                   class="social-icon text-black hover:text-gray-700">
+                                    <i class="bi bi-linkedin"></i>
+                                </a>
+                            ` : ''}
+                            ${hasEmail ? `
+                                <a href="mailto:${emailAddress}" 
+                                   class="social-icon text-black hover:text-gray-700">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                            ` : ''}
+                            ${twitterUrl !== '#' ? `
+                                <a href="${twitterUrl}" target="_blank" 
+                                   class="social-icon text-black hover:text-gray-700">
+                                    <i class="bi bi-twitter-x"></i>
+                                </a>
+                            ` : ''}
+                            ${facebookUrl !== '#' ? `
+                                <a href="${facebookUrl}" target="_blank" 
+                                   class="social-icon text-black hover:text-gray-700">
+                                    <i class="bi bi-facebook"></i>
+                                </a>
+                            ` : ''}
+                        </div>
+                        
+                        <div>
+                            ${item['Company City'] && item['Company Country'] ? `
+                                <div class="text-xs font-bold">
+                                    <i class="bi bi-geo-alt"></i> ${item['Company City']}, ${item['Company Country']}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                agentList.appendChild(card);
+            });
+        }
+
+        function updateActiveAgents(agents) {
+            const activeAgentsList = document.getElementById('activeAgentsList');
+            activeAgentsList.innerHTML = '';
+            
+            agents.forEach((agent, index) => {
+                const agentItem = document.createElement('div');
+                agentItem.className = 'neubrutalism-sm bg-white p-3 flex items-center space-x-3';
+                
+                // Determine color based on agent type (just for visual distinction)
+                const colorClass = (index % 3 === 0) ? 'bg-red-200' : (index % 3 === 1) ? 'bg-yellow-200' : 'bg-teal-200';
+                
+                // Determine personality if available
+                const profile = personalityProfiles[index % personalityProfiles.length];
+                const personalityType = profile ? profile.personalityType : '';
+                
+                agentItem.innerHTML = `
+                    <div class="${colorClass} border-2 border-black rounded-full p-2 flex-shrink-0">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div class="font-bold">${agent['Agent Name'] || `Agent ${index + 1}`}</div>
+                        <div class="text-xs truncate">${agent['Responsibilities'] || 'Specialized agent in the swarm'}</div>
+                        ${personalityType ? `<div class="text-xs capitalize mt-1"><i class="bi bi-person-badge-fill"></i> ${personalityType}</div>` : ''}
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse border border-black"></div>
+                `;
+                
+                activeAgentsList.appendChild(agentItem);
+            });
+        }
+
+        function updateResourcesList(agents) {
+            const resourcesList = document.getElementById('resourcesList');
+            resourcesList.innerHTML = '';
+            
+            // Collect all resources from all agents
+            const allResources = [];
+            
+            agents.forEach(agent => {
+                if (agent.Resources) {
+                    const resources = agent.Resources.split(';').map(r => r.trim()).filter(r => r);
+                    resources.forEach(resource => {
+                        if (!allResources.includes(resource) && resource) {
+                            allResources.push(resource);
+                        }
+                    });
+                }
+            });
+            
+            // Display resources
+            if (allResources.length > 0) {
+                allResources.forEach(resource => {
+                    const resourceItem = document.createElement('div');
+                    resourceItem.className = 'resource-item p-3 rounded-md bg-white flex justify-between items-center';
+                    
+                    // Format the resource URL for display
+                    let displayUrl = resource;
+                    try {
+                        const url = new URL(resource);
+                        displayUrl = url.hostname + url.pathname.substring(0, 15) + (url.pathname.length > 15 ? '...' : '');
+                    } catch (e) {
+                        // Not a valid URL, just display as is
+                    }
+                    
+                    resourceItem.innerHTML = `
+                        <a href="${resource}" target="_blank" class="text-sm font-bold hover:underline truncate flex-grow">
+                            <i class="bi bi-link-45deg mr-1"></i> ${displayUrl}
+                        </a>
+                        <button class="hover:text-red-500" onclick="downloadResource('${resource}')">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    `;
+                    
+                    resourcesList.appendChild(resourceItem);
+                });
+            } else {
+                resourcesList.innerHTML = `
+                    <div class="resource-item p-3 bg-white">
+                        <p class="text-sm text-center py-4">No resources available</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateAgentWeights(data) {
+            const agentWeightsList = document.getElementById('agentWeightsList');
+            agentWeightsList.innerHTML = '';
+            
+            // Sort by weight (importance)
+            const sortedData = [...data].sort((a, b) => b.weight - a.weight);
+            
+            sortedData.slice(0, 7).forEach(agent => {
+                const firstName = agent['First Name'] || 'Unknown';
+                const lastName = agent['Last Name'] || '';
+                const jobTitle = agent['Job Title'] || 'Team Member';
+                const weight = Math.round(agent.weight * 100);
+                
+                const weightItem = document.createElement('div');
+                weightItem.className = 'neubrutalism-sm bg-white p-3';
+                weightItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <span class="font-bold">${firstName} ${lastName}</span>
+                            <span class="text-xs text-gray-600 ml-2">${jobTitle}</span>
+                        </div>
+                        <div class="font-bold">${weight}%</div>
+                    </div>
+                    <div class="w-full bg-gray-200 border border-black">
+                        <div class="bg-red-400 h-4" style="width: ${weight}%"></div>
+                    </div>
+                `;
+                
+                agentWeightsList.appendChild(weightItem);
+            });
+        }
+
+        function renderWorkflowDiagram() {
+            const svg = document.getElementById('workflowSvg');
+            svg.innerHTML = '';
+            
+            // Set dimensions
+            const width = svg.clientWidth;
+            const height = svg.clientHeight;
+            
+            // Create node positions
+            const nodePositions = [];
+            
+            // Position nodes in a force-directed-like layout (manually calculated)
+            for (let i = 0; i < workflowNodes.length; i++) {
+                const angle = (i / workflowNodes.length) * Math.PI * 2;
+                const type = workflowNodes[i].type;
+                
+                let radius;
+                if (type === 0) {
+                    // Input nodes on outer ring
+                    radius = width * 0.35;
+                } else if (type === 1) {
+                    // Process nodes in middle ring
+                    radius = width * 0.25;
+                } else {
+                    // Output nodes in center
+                    radius = width * 0.15;
+                }
+                
+                const x = width/2 + Math.cos(angle) * radius;
+                const y = height/2 + Math.sin(angle) * radius;
+                
+                nodePositions.push({ x, y });
+            }
+            
+            // Draw connections first (so they're behind nodes)
+            workflowLinks.forEach(link => {
+                const sourcePos = nodePositions[link.source];
+                const targetPos = nodePositions[link.target];
+                
+                // Get positions
+                const x1 = sourcePos.x;
+                const y1 = sourcePos.y;
+                const x2 = targetPos.x;
+                const y2 = targetPos.y;
+                
+                // Create a curved line
+                // Calculate control point for curve
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const dr = Math.sqrt(dx * dx + dy * dy);
+                
+                // Draw the path
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M${x1},${y1} A${dr},${dr} 0 0,1 ${x2},${y2}`);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('class', 'connection-line');
+                path.style.opacity = link.value;
+                svg.appendChild(path);
+                
+                // Add arrowhead
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                const markerId = `arrowhead-${link.source}-${link.target}`;
+                marker.setAttribute('id', markerId);
+                marker.setAttribute('viewBox', '0 0 10 10');
+                marker.setAttribute('refX', '5');
+                marker.setAttribute('refY', '5');
+                marker.setAttribute('markerWidth', '6');
+                marker.setAttribute('markerHeight', '6');
+                marker.setAttribute('orient', 'auto-start-reverse');
+                
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                arrow.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+                arrow.setAttribute('fill', '#000');
+                
+                marker.appendChild(arrow);
+                svg.appendChild(marker);
+                
+                path.setAttribute('marker-end', `url(#${markerId})`);
+                
+                // Add label for connection weight
+                const labelX = (x1 + x2) / 2;
+                const labelY = (y1 + y2) / 2 - 10;
+                
+                const connectionLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                connectionLabel.setAttribute('x', labelX);
+                connectionLabel.setAttribute('y', labelY);
+                connectionLabel.setAttribute('text-anchor', 'middle');
+                connectionLabel.setAttribute('font-size', '10');
+                connectionLabel.textContent = Math.round(link.value * 100) + '%';
+                svg.appendChild(connectionLabel);
+            });
+            
+            // Draw nodes
+            workflowNodes.forEach((node, i) => {
+                const x = nodePositions[i].x;
+                const y = nodePositions[i].y;
+                
+                // Determine node shape and color based on type
+                let shapeElement, color;
+                
+                if (node.type === 0) {
+                    // Input nodes - diamonds
+                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    shapeElement.setAttribute('x', x - 20);
+                    shapeElement.setAttribute('y', y - 20);
+                    shapeElement.setAttribute('width', '40');
+                    shapeElement.setAttribute('height', '40');
+                    shapeElement.setAttribute('transform', `rotate(45 ${x} ${y})`);
+                    color = '#ff6b6b';
+                } 
+                else if (node.type === 1) {
+                    // Process nodes - circles
+                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    shapeElement.setAttribute('cx', x);
+                    shapeElement.setAttribute('cy', y);
+                    shapeElement.setAttribute('r', '20');
+                    color = '#ffd166';
+                }
+                else {
+                    // Output nodes - squares
+                    shapeElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    shapeElement.setAttribute('x', x - 20);
+                    shapeElement.setAttribute('y', y - 20);
+                    shapeElement.setAttribute('width', '40');
+                    shapeElement.setAttribute('height', '40');
+                    color = '#4ecdc4';
+                }
+                
+                // Style the shape
+                shapeElement.setAttribute('fill', color);
+                shapeElement.setAttribute('stroke', '#000000');
+                shapeElement.setAttribute('stroke-width', '3');
+                shapeElement.classList.add('agent-node');
+                
+                // Add interactivity
+                shapeElement.addEventListener('click', () => {
+                    selectedAgent = node;
+                    updateSelectedAgentDetail(node);
+                });
+                
+                svg.appendChild(shapeElement);
+                
+                // Add node label
+                const nameLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                nameLabel.setAttribute('x', x);
+                nameLabel.setAttribute('y', y);
+                nameLabel.setAttribute('text-anchor', 'middle');
+                nameLabel.setAttribute('dominant-baseline', 'middle');
+                nameLabel.setAttribute('font-size', '10');
+                nameLabel.setAttribute('font-weight', 'bold');
+                nameLabel.textContent = node.name.split(' ')[0];
+                nameLabel.classList.add('agent-node-label');
+                svg.appendChild(nameLabel);
+                
+                // Add ID label
+                const idLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                idLabel.setAttribute('x', x);
+                idLabel.setAttribute('y', y + 35);
+                idLabel.setAttribute('text-anchor', 'middle');
+                idLabel.setAttribute('font-size', '10');
+                idLabel.textContent = `#${node.id}`;
+                svg.appendChild(idLabel);
+            });
+        }
+
+        function updateSelectedAgentDetail(agent) {
+            const detailContainer = document.getElementById('selectedAgentDetail');
+            
+            // Calculate connections
+            const outgoingConnections = workflowLinks.filter(link => link.source === agent.id);
+            const incomingConnections = workflowLinks.filter(link => link.target === agent.id);
+            
+            // Determine agent type text
+            let agentTypeText;
+            if (agent.type === 0) {
+                agentTypeText = 'Input Processor';
+            } else if (agent.type === 1) {  
+                agentTypeText = 'Core Processor';
+            } else {
+                agentTypeText = 'Output Formatter';
+            }
+            
+            // Get personality profile if available
+            const profile = personalityProfiles.find(p => p.agentId === agent.id);
+            
+            detailContainer.innerHTML = `
+                <h3 class="font-bold text-xl">${agent.name}</h3>
+                <div class="text-sm mt-1">${agentTypeText}</div>
+                
+                ${profile ? `
+                <div class="text-sm mt-1 capitalize"><i class="bi bi-person-badge-fill"></i> ${profile.personalityType} Personality</div>
+                ` : ''}
+                
+                <div class="mt-4 space-y-2">
+                    <div class="neubrutalism-sm p-2 bg-white">
+                        <h4 class="text-xs uppercase font-bold">Description</h4>
+                        <p class="text-sm">${agent.description}</p>
+                    </div>
+                    
+                    <div class="neubrutalism-sm p-2 bg-white">
+                        <h4 class="text-xs uppercase font-bold">Responsibilities</h4>
+                        <p class="text-sm">${agent.responsibilities}</p>
+                    </div>
+                    
+                    ${profile ? `
+                    <div class="neubrutalism-sm p-2 bg-white">
+                        <h4 class="text-xs uppercase font-bold">Personality Traits</h4>
+                        <p class="text-sm">${profile.traits.join(', ')}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="neubrutalism-sm p-2 bg-white">
+                        <h4 class="text-xs uppercase font-bold">Weight</h4>
+                        <div class="w-full bg-gray-200 mt-1 border border-black">
+                            <div class="bg-red-400 h-4" style="width: ${Math.round(agent.weight * 100)}%"></div>
+                        </div>
+                        <div class="text-right text-sm font-bold mt-1">${Math.round(agent.weight * 100)}%</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="neubrutalism-sm p-2 bg-white">
+                            <h4 class="text-xs uppercase font-bold">Connections In</h4>
+                            <div class="text-center text-xl font-bold">${incomingConnections.length}</div>
+                        </div>
+                        
+                        <div class="neubrutalism-sm p-2 bg-white">
+                            <h4 class="text-xs uppercase font-bold">Connections Out</h4>
+                            <div class="text-center text-xl font-bold">${outgoingConnections.length}</div>
+                        </div>
+                    </div>
+                    
+                    ${incomingConnections.length > 0 ? `
+                        <div class="neubrutalism-sm p-2 bg-white">
+                            <h4 class="text-xs uppercase font-bold">Input From</h4>
+                            <ul class="text-sm list-disc list-inside">
+                                ${incomingConnections.map(conn => `
+                                    <li>#${conn.source}: ${workflowNodes[conn.source]?.name || 'Unknown'} 
+                                        <span class="text-xs">(${Math.round(conn.value * 100)}%)</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    ${outgoingConnections.length > 0 ? `
+                        <div class="neubrutalism-sm p-2 bg-white">
+                            <h4 class="text-xs uppercase font-bold">Output To</h4>
+                            <ul class="text-sm list-disc list-inside">
+                                ${outgoingConnections.map(conn => `
+                                    <li>#${conn.target}: ${workflowNodes[conn.target]?.name || 'Unknown'}
+                                        <span class="text-xs">(${Math.round(conn.value * 100)}%)</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Function to update personality profiles grid
+        function updatePersonalityProfilesGrid() {
+            const grid = document.getElementById('personalityProfilesGrid');
+            grid.innerHTML = '';
+            
+            personalityProfiles.forEach((profile, index) => {
+                // Get color based on personality type
+                let bgColor;
+                switch(profile.personalityType) {
+                    case 'analytical': bgColor = 'bg-blue-100'; break;
+                    case 'creative': bgColor = 'bg-purple-100'; break;
+                    case 'diplomatic': bgColor = 'bg-green-100'; break;
+                    case 'critical': bgColor = 'bg-orange-100'; break;
+                    case 'supportive': bgColor = 'bg-pink-100'; break;
+                    default: bgColor = 'bg-gray-100';
+                }
+                
+                // Create card
+                const card = document.createElement('div');
+                card.className = `personality-card p-6 ${bgColor}`;
+                card.setAttribute('data-personality-type', profile.personalityType);
+                
+                // Get agent's strongest relationships
+                const strongest = profile.relationshipDynamics.strongest.map(type => 
+                    `<span class="capitalize">${type}</span>`).join(', ');
+                    
+                // Get agent's weakest relationships
+                const weakest = profile.relationshipDynamics.weakest.map(type => 
+                    `<span class="capitalize">${type}</span>`).join(', ');
+                
+                card.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full border-3 border-black overflow-hidden mr-3">
+                            <img src="${profile.avatar}" alt="${profile.firstName}" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">${profile.firstName} ${profile.lastName}</h3>
+                            <p class="text-sm">${profile.positionTitle}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-b-2 border-black mb-3"></div>
+                    
+                    <div class="mb-3">
+                        <h4 class="text-xs uppercase font-bold">Personality Type</h4>
+                        <p class="capitalize text-lg font-bold">${profile.personalityType}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h4 class="text-xs uppercase font-bold">Key Traits</h4>
+                        <ul class="text-sm list-disc list-inside">
+                            ${profile.traits.map(trait => `<li>${trait}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h4 class="text-xs uppercase font-bold">Communication Style</h4>
+                        <p class="text-sm">${profile.communicationStyle}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <h4 class="text-xs uppercase font-bold">Works Best With</h4>
+                            <p class="text-sm">${strongest}</p>
+                        </div>
+                        <div>
+                            <h4 class="text-xs uppercase font-bold">Challenges With</h4>
+                            <p class="text-sm">${weakest}</p>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        // Function to filter personality profiles
+        function filterPersonalityProfiles() {
+            const searchTerm = document.getElementById('profileSearch').value.toLowerCase();
+            const personalityType = document.getElementById('personalityFilter').value;
+            const cards = document.querySelectorAll('#personalityProfilesGrid .personality-card');
+            
+            cards.forEach(card => {
+                const cardText = card.textContent.toLowerCase();
+                const cardType = card.getAttribute('data-personality-type');
+                
+                // Show card if it matches both search term and personality type filter
+                const matchesSearch = searchTerm === '' || cardText.includes(searchTerm);
+                const matchesType = personalityType === 'all' || cardType === personalityType;
+                
+                if (matchesSearch && matchesType) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Function to process chat messages
+        function handleChatMessage(event) {
+            event.preventDefault();
+            const userMessage = document.getElementById('userMessage');
+            const message = userMessage.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessageToChat('user', message);
+            userMessage.value = '';
+            
+            // Show typing indicator
+            addTypingIndicator();
+            
+            // Simulate AI response after delay
+            setTimeout(() => {
+                // Remove typing indicator
+                removeTypingIndicator();
+                
+                // Process message and generate response
+                const response = generateAgentResponse(message);
+                
+                // Add agent response to chat
+                addMessageToChat('agent', response.text);
+                
+                // Handle media if present
+                if (response.hasMedia) {
+                    showMediaResponse(response.mediaType, response.mediaUrl, response.mediaCaption);
+                } else {
+                    document.getElementById('responseMediaContainer').classList.add('hidden');
+                }
+            }, 1500);
+        }
+
+        function addMessageToChat(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-3';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="flex-grow"></div>
+                    <div class="user-message p-4 max-w-[80%]">
+                        <p>${message}</p>
+                    </div>
+                    <div class="bg-blue-200 border-2 border-black p-2">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="bg-yellow-200 border-2 border-black p-2">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="agent-message p-4 max-w-[80%]">
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.id = 'typingIndicator';
+            indicatorDiv.className = 'flex items-start space-x-3';
+            indicatorDiv.innerHTML = `
+                <div class="bg-yellow-200 border-2 border-black p-2">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div class="agent-message p-4 max-w-[80%] chat-animation">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-black rounded-full"></div>
+                        <div class="w-3 h-3 bg-black rounded-full"></div>
+                        <div class="w-3 h-3 bg-black rounded-full"></div>
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(indicatorDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        function generateAgentResponse(message) {
+            // This is a simulated response generator
+            // In a real app, this would call an API endpoint
+            
+            message = message.toLowerCase();
+            
+            // Sample responses based on message content
+            if (message.includes('hello') || message.includes('hi') || message.includes('hey')) {
+                return {
+                    text: "Hello! I'm the Alchemy Agent Swarm. How can I assist you today?",
+                    hasMedia: false
+                };
+            } else if (message.includes('company') && message.includes('info')) {
+                return {
+                    text: "Alchemy Shares and Brokerage Firm was founded in 2013. It's a private B2B company based in San Francisco with approximately 27 employees and revenue between $5-10 million USD.",
+                    hasMedia: false
+                };
+            } else if (message.includes('employees') || message.includes('team')) {
+                return {
+                    text: "Our team consists of talented individuals like Joseph Lau (Chief Technology Officer) and Joan Hodson (Owner), along with many other specialists across different departments.",
+                    hasMedia: false
+                };
+            } else if (message.includes('funding') || message.includes('investors')) {
+                return {
+                    text: "Alchemy has raised over $550 million in funding. The most recent round was Series C for $450 million in October 2021, led by investors including Andreessen Horowitz, Lightspeed Venture Partners, and Coatue.",
+                    hasMedia: true,
+                    mediaType: 'image',
+                    mediaUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+                    mediaCaption: 'Alchemy Funding Rounds Visualization'
+                };
+            } else if (message.includes('chart') || message.includes('graph') || message.includes('visual')) {
+                return {
+                    text: "Here's a visual representation of our company structure and funding rounds:",
+                    hasMedia: true,
+                    mediaType: 'image',
+                    mediaUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+                    mediaCaption: 'Alchemy company structure and funding visualization'
+                };
+            } else if (message.includes('video') || message.includes('demo')) {
+                return {
+                    text: "I'd be happy to show you a demo video of our platform. Here's our latest product overview:",
+                    hasMedia: true,
+                    mediaType: 'video',
+                    mediaUrl: 'https://mazwai.com/videvo_files/video/free/2015-09/small_watermarked/TD_London_-_City_Hall_preview.mp4',
+                    mediaCaption: 'Alchemy Platform Overview'
+                };
+            } else if (message.includes('mission') || message.includes('vision') || message.includes('goals')) {
+                return {
+                    text: "Our mission is to optimize business operations through intelligent agent swarm technology. We're building the future of collaborative AI systems that work together to solve complex problems.",
+                    hasMedia: false
+                };
+            } else if (message.includes('workflow') || message.includes('process') || message.includes('how do you work')) {
+                return {
+                    text: "I work by coordinating multiple specialized agents that each have different skills. When you ask a question, I route it to the appropriate agents, they gather information, analyze it collaboratively, and then I formulate a response. You can see a visualization of this process in the Agent Workflow tab.",
+                    hasMedia: false
+                };
+            } else if (message.includes('personality') || message.includes('profiles') || message.includes('types')) {
+                return {
+                    text: "Each agent in our swarm has a distinct personality profile that guides their interactions. We have analytical, creative, diplomatic, critical, and supportive personality types. These different perspectives help us collaborate effectively and solve problems from multiple angles. You can explore all our agent personalities in the Personality Profiles tab.",
+                    hasMedia: true,
+                    mediaType: 'image',
+                    mediaUrl: 'https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?q=80&w=1974&auto=format&fit=crop',
+                    mediaCaption: 'Agent Personality Distribution'
+                };
+            } else {
+                return {
+                    text: "I understand you're asking about " + message.split(' ').slice(0, 3).join(' ') + "... As an agent swarm, I can help with information about Alchemy employees, company data, funding, or answer general questions about our technology. Could you provide more details about what you'd like to know?",
+                    hasMedia: false
+                };
+            }
+        }
+
+        function showMediaResponse(type, url, caption) {
+            const mediaContent = document.getElementById('mediaContent');
+            mediaContent.innerHTML = '';
+            
+            if (type === 'image') {
+                mediaContent.innerHTML = `
+                    <div class="neubrutalism-sm p-3 bg-white">
+                        <img src="${url}" alt="${caption}" class="rounded-lg max-h-[300px] w-auto border-3 border-black">
+                        <p class="text-sm text-center mt-2 font-bold">${caption}</p>
+                    </div>
+                `;
+            } else if (type === 'video') {
+                mediaContent.innerHTML = `
+                    <div class="neubrutalism-sm p-3 bg-white">
+                        <video controls class="rounded-lg w-full max-h-[300px] border-3 border-black">
+                            <source src="${url}" type="video/mp4">
+                            Your browser does not support video playback.
+                        </video>
+                        <p class="text-sm text-center mt-2 font-bold">${caption}</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('responseMediaContainer').classList.remove('hidden');
+        }
+
+        function downloadResource(url) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = url.split('/').pop() || 'resource';
+            a.target = '_blank';
+            a.click();
+        }
+
+        // Helper function to convert string to integer for hue value
+        function hashStringToInt(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            return Math.abs(hash);
+        }
+
+        // Download all resources as a JSON file
+        function downloadAllResources() {
+            // Collect all resources
+            const resources = [];
+            agentData.forEach(agent => {
+                if (agent.Resources) {
+                    const agentResources = agent.Resources.split(';').map(r => r.trim()).filter(r => r);
+                    resources.push({
+                        agent: agent['Agent Name'] || `Agent ${agent['Agent Number']}`,
+                        resources: agentResources
+                    });
+                }
+            });
+            
+            // Create JSON file
+            const jsonData = JSON.stringify(resources, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Download file
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'alchemy_resources.json';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Sorting function for agent list
+        function sortAgents(sortBy) {
+            // Get combined data
+            const combinedData = employeeData.map((employee, index) => {
+                const agent = agentData[index % agentData.length];
+                return {
+                    ...employee,
+                    agentInfo: agent,
+                    weight: Math.random() * 0.7 + 0.3,
+                    connections: generateRandomConnections(employeeData.length, index)
+                };
+            });
+            
+            // Sort data based on criteria
+            let sortedData;
+            
+            if (sortBy === 'name') {
+                sortedData = [...combinedData].sort((a, b) => {
+                    const nameA = `${a['First Name'] || ''} ${a['Last Name'] || ''}`.trim();
+                    const nameB = `${b['First Name'] || ''} ${b['Last Name'] || ''}`.trim();
+                    return nameA.localeCompare(nameB);
+                });
+            } else if (sortBy === 'title') {
+                sortedData = [...combinedData].sort((a, b) => {
+                    return (a['Job Title'] || '').localeCompare(b['Job Title'] || '');
+                });
+            } else if (sortBy === 'company') {
+                sortedData = [...combinedData].sort((a, b) => {
+                    return (a['Company Name'] || '').localeCompare(b['Company Name'] || '');
+                });
+            } else {
+                sortedData = combinedData;
+            }
+            
+            // Update UI with sorted data
+            updateUI(sortedData);
+        }
+
+        function setupEventListeners() {
+            // Tab switching
+            document.getElementById('visualizationTab').addEventListener('click', () => {
+                document.getElementById('visualizationTab').classList.add('tab-active');
+                document.getElementById('chatTab').classList.remove('tab-active');
+                document.getElementById('workflowTab').classList.remove('tab-active');
+                document.getElementById('profilesTab').classList.remove('tab-active');
+                
+                document.getElementById('visualizationView').classList.remove('hidden');
+                document.getElementById('chatView').classList.add('hidden');
+                document.getElementById('workflowView').classList.add('hidden');
+                document.getElementById('personalityProfilesView').classList.add('hidden');
+            });
+            
+            document.getElementById('chatTab').addEventListener('click', () => {
+                document.getElementById('chatTab').classList.add('tab-active');
+                document.getElementById('visualizationTab').classList.remove('tab-active');
+                document.getElementById('workflowTab').classList.remove('tab-active');
+                document.getElementById('profilesTab').classList.remove('tab-active');
+                
+                document.getElementById('chatView').classList.remove('hidden');
+                document.getElementById('visualizationView').classList.add('hidden');
+                document.getElementById('workflowView').classList.add('hidden');
+                document.getElementById('personalityProfilesView').classList.add('hidden');
+            });
+            
+            document.getElementById('workflowTab').addEventListener('click', () => {
+                document.getElementById('workflowTab').classList.add('tab-active');
+                document.getElementById('visualizationTab').classList.remove('tab-active');
+                document.getElementById('chatTab').classList.remove('tab-active');
+                document.getElementById('profilesTab').classList.remove('tab-active');
+                
+                document.getElementById('workflowView').classList.remove('hidden');
+                document.getElementById('visualizationView').classList.add('hidden');
+                document.getElementById('chatView').classList.add('hidden');
+                document.getElementById('personalityProfilesView').classList.add('hidden');
+            });
+            
+            document.getElementById('profilesTab').addEventListener('click', () => {
+                document.getElementById('profilesTab').classList.add('tab-active');
+                document.getElementById('visualizationTab').classList.remove('tab-active');
+                document.getElementById('chatTab').classList.remove('tab-active');
+                document.getElementById('workflowTab').classList.remove('tab-active');
+                
+                document.getElementById('personalityProfilesView').classList.remove('hidden');
+                document.getElementById('visualizationView').classList.add('hidden');
+                document.getElementById('chatView').classList.add('hidden');
+                document.getElementById('workflowView').classList.add('hidden');
+            });
+            
+            // Chat form submission
+            document.getElementById('chatForm').addEventListener('submit', handleChatMessage);
+            
+            // Sort selection
+            document.getElementById('sortSelect').addEventListener('change', (e) => {
+                sortAgents(e.target.value);
+            });
+            
+            // Download resources button
+            document.getElementById('downloadResourcesBtn').addEventListener('click', downloadAllResources);
+            
+            // Visualization mode change
+            document.getElementById('vizModeSelect').addEventListener('change', () => {
+                // Get combined data
+                const combinedData = employeeData.map((employee, index) => {
+                    const agent = agentData[index % agentData.length];
+                    return {
+                        ...employee,
+                        agentInfo: agent,
+                        weight: Math.random() * 0.7 + 0.3,
+                        connections: generateRandomConnections(employeeData.length, index)
+                    };
+                });
+                
+                createAgentVisuals(combinedData);
+            });
+            
+            // Show connections toggle
+            document.getElementById('showConnections').addEventListener('change', (e) => {
+                // Clear scene and rebuild
+                agentMeshes.forEach(mesh => {
+                    scene.remove(mesh);
+                });
+                
+                // Clear all lines
+                scene.children = scene.children.filter(child => 
+                    !(child.type === 'Line'));
+                
+                // Get combined data
+                const combinedData = employeeData.map((employee, index) => {
+                    const agent = agentData[index % agentData.length];
+                    return {
+                        ...employee,
+                        agentInfo: agent,
+                        weight: Math.random() * 0.7 + 0.3,
+                        connections: generateRandomConnections(employeeData.length, index)
+                    };
+                });
+                
+                // Recreate agent visuals
+                createAgentVisuals(combinedData);
+            });
+            
+            // Auto rotate toggle
+            document.getElementById('autoRotate').addEventListener('change', (e) => {
+                autoRotate = e.target.checked;
+            });
+            
+            // Personality profiles search and filter
+            document.getElementById('profileSearch').addEventListener('input', filterPersonalityProfiles);
+            document.getElementById('personalityFilter').addEventListener('change', filterPersonalityProfiles);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = document.getElementById('visualizationContainer').clientWidth / 
+                               document.getElementById('visualizationContainer').clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(
+                    document.getElementById('visualizationContainer').clientWidth, 
+                    document.getElementById('visualizationContainer').clientHeight
+                );
+            }
+            
+            // Redraw workflow diagram
+            renderWorkflowDiagram();
+        });
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize 3D visualization
+            initThreeJS();
+            
+            // Load data
+            loadData();
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
